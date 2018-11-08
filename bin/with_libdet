@@ -1,0 +1,14 @@
+#!/bin/bash
+
+DETMONAD_DIR=$(realpath `dirname $0`/..)
+
+if [ "$DEBUG" == "" ];
+then export DEBUG=2
+fi
+
+# Set the permissions to this whole directory by default...
+PATH=$PATH:$DETMONAD_DIR/bin \
+  DETIO_R_PERMS_LIST=/usr:/bin:/lib:/dev/urandom:/dev/random:/dev/tty:/dev/stdin:/dev/stdout:/dev/stderr:/proc/self/maps:/proc/filesystems:${DETMONAD_DIR} \
+  DETIO_W_PERMS_LIST=${DETMONAD_DIR} \
+  DETIO_URAND_PATH=/dev/urandom \
+  LD_PRELOAD=${DETMONAD_DIR}/cbits/libdet.so $@

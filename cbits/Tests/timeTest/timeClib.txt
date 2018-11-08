@@ -1,0 +1,7 @@
+clock_t clock (void)                                        DONE
+int gettimeofday (struct timeval *tp, struct timezone *tzp) DONE
+int ntp_gettime (struct ntptimeval *tptr)
+time_t time (time_t *result)                                DONE
+clock_t times (struct tms *buffer)
+extern int clock_gettime (clockid_t __clock_id, struct timespec *__tp)
+int clock_getcpuclockid (pid_t __pid, clockid_t *__clock_id)

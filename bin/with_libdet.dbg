@@ -1,0 +1,4 @@
+#!/bin/bash
+
+valgrind --trace-children=yes $(dirname $0)/with_libdet $@
+

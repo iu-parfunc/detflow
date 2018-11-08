@@ -1,0 +1,6 @@
+a.out
+*.exe
+bench_*.log
+*.bak
+microbenchmarks_*.*
+results_*.dat

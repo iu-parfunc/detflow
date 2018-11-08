@@ -1,0 +1,122 @@
+# The file which includes this should define:
+#   CODEFILE, CODEURL
+#   DATAFILE, DATAURL
+#
+#  EXTRA_DELETES - things to delete when freshening
+# It should also define a target "build" that builds or
+# fetches the binary, typically to bin/$(PROGNAME).
+
+# This Makefile also obeys:
+# 
+#   DETFLOW_THREADS:  set to, e.g. "-j3" or left empty
+#   DETFLOW_VARIANT:  --nondet, --det, --rr-record, --rr-replay, or empty
+#   DETFLOW_OPTIONS:  passed through to detflow command
+#   DETFLOW_PERMS_FLAGS: which directories to allow, passed through to detflow command.
+#   HOWMANY - how many of the input benchmark files to run
+#   INNER_PAR - optional second parameter after HOWMANY for specifying inner paralellism.
+
+# ================================================================================
+
+# Run all files by default.  Set to an integer to restrict the program to fewer.
+HOWMANY=
+
+WGET= wget --progress=dot:giga --no-clobber  --no-check-certificate
+
+STK= stack $(STACK_ARGS)
+STKDOCK= stack $(STACK_ARGS) --docker
+
+EXTRA_DELETES ?=
+
+DETFLOW_PERMS_FLAGS ?= -i in -o out
+
+default: test
+
+test_docker: build get
+	$(STKDOCK) exec -- which detflow || $(STKDOCK) install
+	$(MAKE) freshen
+	$(STKDOCK) exec -- /usr/bin/time detflow --time $(DETFLOW_OPTIONS) $(DETFLOW_PERMS_FLAGS) $(DETFLOW_VARIANT) $(DETFLOW_THREADS) RunIt.hs $(HOWMANY) $(INNER_PAR)
+	$(MAKE) cache_out
+
+test: build
+	$(STK) exec -- which detflow || $(STK) build
+	$(MAKE) freshen
+	$(STK) exec -- /usr/bin/time detflow --time $(DETFLOW_OPTIONS) $(DETFLOW_PERMS_FLAGS) $(DETFLOW_VARIANT) $(DETFLOW_THREADS) RunIt.hs $(HOWMANY) $(INNER_PAR)
+	$(MAKE) cache_out
+
+cache_out:
+	$(MAKE) hash_out
+	if [ -e out.hashes ]; then \
+          $(MAKE) check_out; \
+         else hashdeep -lr out > out.hashes; cp -a out out_expected; fi
+
+hash_in:
+	@echo "\nINPUT directory state:"
+	../../../bin/hashdir.sh in/
+	../../../bin/dirsize.sh in/
+
+hash_out:
+	@echo "OUTPUT directory state:"
+	../../../bin/hashdir.sh out/
+	../../../bin/dirsize.sh out/
+
+$(CODEFILE):
+	$(WGET) $(CODEURL)
+	md5sum $(CODEFILE) | tee codefile.md5sum
+
+$(DATAFILE):
+	$(WGET) $(DATAURL)
+	md5sum $(DATAFILE) | tee datafile.md5sum
+
+get: in
+in: in_expected
+	$(MAKE) freshen_in
+
+freshen: reset_out freshen_in
+	rm -rf $(EXTRA_DELETES)
+
+reset_out:
+	mkdir -p out
+	rm -rf out/*
+
+# This is ugly, but we restore the input to its starting state with a sledge hammer:
+freshen_in: in_expected
+	rsync -rplt --delete in_expected/ in/
+	$(MAKE) hash_in
+	if ! [ -e in.hashes ]; then hashdeep -lr in > in.hashes; fi
+
+# 	if test "$${DATAFILE##*.}" == zip ;
+ifeq "$(suffix ${DATAFILE})" ".zip"
+UNPACKER= unzip -o
+else
+UNPACKER= tar xf
+endif
+
+
+# Cache the expected *starting point* for the workflow.
+in_expected: $(DATAFILE)
+	rm -rf in
+	$(UNPACKER) $(DATAFILE)
+	ls
+	if [ -e "$(DATA_UNPACK_DIR)" ]; \
+          then mv $(DATA_UNPACK_DIR) in_expected; touch in_expected; \
+          elif [ -e in ]; then mv in in_expected; touch in_expected; \
+          else echo "Cannot find unpacked result from $(DATAFILE)!"; exit 1; fi
+
+# Check against expected:
+check_in:
+	hashdeep -ravvl -k in.hashes in
+
+# Check against expected:
+check_out:
+	hashdeep -ravvl -k out.hashes out || diff  --recursive out_expected out
+
+# Wipe it for another run
+clean:
+	rm -rf in out out_expected *.hashes
+
+# Wipe everything, including the code/program:
+distclean: clean
+	rm -rf in_expected bin $(CODEFILE) $(DATAFILE) $(EXTRA_DELETES) *.md5sum *.o *.hi DetMainXXX*.hs
+
+.PHONY: clean all get hash distclean test check_in freshen reset_out freshen_in build
+

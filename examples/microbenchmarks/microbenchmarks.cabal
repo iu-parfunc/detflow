@@ -1,0 +1,21 @@
+name:                microbenchmarks
+version:             0.1.0.0
+license:             BSD3
+license-file:        LICENSE
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+executable detmonad-microbenchmarks
+  --  type:                exitcode-stdio-1.0
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  build-depends:       base >= 4.8
+                     , process
+                     , async
+                     , criterion
+                     , detmonad
+                     , silently
+                     , text
+  ghc-options:         -O2 -Wall -threaded -rtsopts
+  default-language:    Haskell2010

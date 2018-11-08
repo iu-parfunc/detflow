@@ -1,0 +1,362 @@
+
+
+[2017.04.16] {Running microbenchmarks}
+--------------------------------------
+
+In the initial mode we do an unbounded number of prints-per-thread,
+and thus an unbounded amount of buffering in the deterministic
+version.
+
+Here are some results from Swarm, -N1:
+
+Command:
+stack bench microbenchmarks --benchmark-arguments="--regress=allocated:iters --regress=bytesCopied:iters --regress=cycles:iters --regress=numGcs:iters --regreses=mutatorWallSeconds:iters --regress=gcWallSeconds:iters --regress=cpuTime:iters  -o microbenchmarks_N1.html +RTS -s -N1"
+
+    benchmarking Data.Text.putStrLn
+    time                 351.7 ns   (350.1 ns .. 353.6 ns)
+                         0.997 R²   (0.994 R² .. 0.998 R²)
+    mean                 370.5 ns   (359.7 ns .. 397.7 ns)
+    std dev              55.29 ns   (28.88 ns .. 88.55 ns)
+    allocated:           1.000 R²   (1.000 R² .. 1.000 R²)
+      iters              1577.105   (1576.867 .. 1577.346)
+      y                  87664.153  (51057.533 .. 122777.173)
+    bytesCopied:         0.983 R²   (0.972 R² .. 0.990 R²)
+      iters              1.520      (1.490 .. 1.560)
+      y                  14787.061  (11560.969 .. 17919.716)
+    cycles:              0.997 R²   (0.994 R² .. 0.998 R²)
+      iters              808.958    (805.289 .. 813.437)
+      y                  3652556.521 (2921538.920 .. 4458126.444)
+    numGcs:              1.000 R²   (1.000 R² .. 1.000 R²)
+      iters              3.040e-3   (3.040e-3 .. 3.041e-3)
+      y                  4.277e-2   (-1.327e-2 .. 0.101)
+    mutatorWallSeconds:  0.997 R²   (0.994 R² .. 0.998 R²)
+      iters              3.444e-7   (3.429e-7 .. 3.461e-7)
+      y                  1.493e-3   (1.192e-3 .. 1.830e-3)
+    gcWallSeconds:       0.961 R²   (0.930 R² .. 0.978 R²)
+      iters              7.387e-9   (7.236e-9 .. 7.559e-9)
+      y                  1.005e-4   (7.680e-5 .. 1.274e-4)
+    cpuTime:             0.996 R²   (0.993 R² .. 0.998 R²)
+      iters              3.528e-7   (3.511e-7 .. 3.548e-7)
+      y                  1.753e-3   (1.419e-3 .. 2.109e-3)
+    variance introduced by outliers: 95% (severely inflated)
+
+    benchmarking Control.Monad.DetIO.putTextLn
+    time                 2.309 μs   (2.258 μs .. 2.362 μs)
+                         0.989 R²   (0.984 R² .. 0.993 R²)
+    mean                 2.196 μs   (2.082 μs .. 2.288 μs)
+    std dev              320.7 ns   (271.6 ns .. 374.9 ns)
+    allocated:           1.000 R²   (1.000 R² .. 1.000 R²)
+      iters              1718.710   (1717.438 .. 1719.852)
+      y                  83130.431  (42174.581 .. 126789.697)
+    bytesCopied:         0.996 R²   (0.994 R² .. 0.997 R²)
+      iters              870.928    (854.368 .. 882.004)
+      y                  -846899.712 (-1003987.898 .. -688454.043)
+    cycles:              0.989 R²   (0.984 R² .. 0.993 R²)
+      iters              5310.768   (5203.922 .. 5440.705)
+      y                  -4740439.319 (-6191439.457 .. -3512101.357)
+    numGcs:              1.000 R²   (1.000 R² .. 1.000 R²)
+      iters              3.271e-3   (3.263e-3 .. 3.276e-3)
+      y                  -0.219     (-0.307 .. -0.130)
+    mutatorWallSeconds:  0.987 R²   (0.983 R² .. 0.992 R²)
+      iters              7.648e-7   (7.405e-7 .. 7.979e-7)
+      y                  -4.838e-5  (-2.597e-4 .. 1.301e-4)
+    gcWallSeconds:       0.987 R²   (0.980 R² .. 0.992 R²)
+      iters              1.544e-6   (1.504e-6 .. 1.579e-6)
+      y                  -2.006e-3  (-2.483e-3 .. -1.544e-3)
+    cpuTime:             0.990 R²   (0.984 R² .. 0.994 R²)
+      iters              2.339e-6   (2.291e-6 .. 2.392e-6)
+      y                  -2.022e-3  (-2.601e-3 .. -1.460e-3)
+    variance introduced by outliers: 94% (severely inflated)
+
+    benchmarking Control.Monad.DetIO.putTextLn (nondet)
+    time                 312.2 ns   (311.1 ns .. 313.7 ns)
+                         0.996 R²   (0.992 R² .. 0.998 R²)
+    mean                 337.2 ns   (323.2 ns .. 355.9 ns)
+    std dev              56.49 ns   (35.14 ns .. 73.81 ns)
+    allocated:           1.000 R²   (1.000 R² .. 1.000 R²)
+      iters              1137.481   (1137.279 .. 1137.680)
+      y                  109912.437 (68740.555 .. 151685.927)
+    bytesCopied:         0.910 R²   (0.877 R² .. 0.934 R²)
+      iters              1.652      (1.529 .. 1.796)
+      y                  33343.208  (25227.940 .. 41810.619)
+    cycles:              0.996 R²   (0.993 R² .. 0.998 R²)
+      iters              718.079    (715.620 .. 721.495)
+      y                  3929963.272 (3062530.541 .. 4837621.487)
+    numGcs:              1.000 R²   (1.000 R² .. 1.000 R²)
+      iters              2.172e-3   (2.172e-3 .. 2.173e-3)
+      y                  5.714e-2   (-1.943e-3 .. 0.117)
+    mutatorWallSeconds:  0.996 R²   (0.993 R² .. 0.998 R²)
+      iters              2.957e-7   (2.949e-7 .. 2.968e-7)
+      y                  1.531e-3   (1.234e-3 .. 1.849e-3)
+    gcWallSeconds:       0.975 R²   (0.966 R² .. 0.983 R²)
+      iters              1.653e-8   (1.589e-8 .. 1.726e-8)
+      y                  1.861e-4   (1.425e-4 .. 2.299e-4)
+    cpuTime:             0.995 R²   (0.991 R² .. 0.997 R²)
+      iters              3.209e-7   (3.196e-7 .. 3.228e-7)
+      y                  1.927e-3   (1.551e-3 .. 2.341e-3)
+    variance introduced by outliers: 96% (severely inflated)
+
+      44,760,008,352 bytes allocated in the heap
+       2,171,043,152 bytes copied during GC
+          17,242,936 bytes maximum residency (365 sample(s))
+           2,846,720 bytes maximum slop
+                  48 MB total memory in use (0 MB lost due to fragmentation)
+
+                                         Tot time (elapsed)  Avg pause  Max pause
+      Gen  0     85159 colls,     0 par    2.224s   2.334s     0.0000s    0.0021s
+      Gen  1       365 colls,     0 par    1.412s   1.547s     0.0042s    0.0254s
+
+      TASKS: 5 (1 bound, 4 peak workers (4 total), using -N1)
+
+      SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+      INIT    time    0.000s  (  0.001s elapsed)
+      MUT     time   14.012s  ( 14.716s elapsed)
+      GC      time    3.636s  (  3.881s elapsed)
+      EXIT    time    0.000s  (  0.001s elapsed)
+      Total   time   17.648s  ( 18.598s elapsed)
+
+      Alloc rate    3,194,405,391 bytes per MUT second
+
+      Productivity  79.4% of total user, 79.1% of total elapsed
+
+But at -N4 contention on the handles becomes a problem:
+
+    stack bench microbenchmarks --benchmark-arguments="--regress=allocated:iters --regress=bytesCopied:iters --regress=cycles:iters --regress=numGcs:iters --regress=mutatorWallSeconds:iters --regress=gcWallSeconds:iters --regress=cpuTime:iters  -o microbenchmarks.html +RTS -s -N4"
+    microbenchmarks-0.1.0.0: benchmarks
+    Running 1 benchmarks...
+    Benchmark microbenchmarks: RUNNING...
+    benchmarking Data.Text.putStrLn
+    time                 102.8 μs   (97.55 μs .. 106.1 μs)
+                         0.985 R²   (0.974 R² .. 0.993 R²)
+    mean                 99.51 μs   (95.72 μs .. 103.1 μs)
+    std dev              11.75 μs   (9.741 μs .. 13.27 μs)
+    allocated:           0.966 R²   (0.944 R² .. 0.979 R²)
+      iters              6904.398   (6658.945 .. 7127.701)
+      y                  92101.675  (-70688.449 .. 259157.676)
+    bytesCopied:         0.298 R²   (0.164 R² .. 0.502 R²)
+      iters              30.116     (20.633 .. 42.617)
+      y                  10654.499  (5956.414 .. 15305.345)
+    cycles:              0.985 R²   (0.973 R² .. 0.993 R²)
+      iters              236435.201 (223885.970 .. 243658.397)
+      y                  -3443818.195 (-5149353.988 .. -1368406.592)
+    numGcs:              0.845 R²   (0.815 R² .. 0.890 R²)
+      iters              3.980e-3   (3.583e-3 .. 4.588e-3)
+      y                  0.218      (6.880e-2 .. 0.356)
+    mutatorWallSeconds:  0.984 R²   (0.973 R² .. 0.993 R²)
+      iters              1.026e-4   (9.737e-5 .. 1.059e-4)
+      y                  -1.534e-3  (-2.297e-3 .. -5.432e-4)
+    gcWallSeconds:       0.173 R²   (0.069 R² .. 0.380 R²)
+      iters              1.592e-7   (9.358e-8 .. 2.403e-7)
+      y                  4.225e-5   (1.073e-5 .. 7.869e-5)
+    cpuTime:             0.984 R²   (0.973 R² .. 0.993 R²)
+      iters              1.372e-4   (1.299e-4 .. 1.416e-4)
+      y                  -1.954e-3  (-3.026e-3 .. -6.172e-4)
+    variance introduced by outliers: 86% (severely inflated)
+
+    benchmarking Control.Monad.DetIO.putTextLn
+    time                 4.900 μs   (4.742 μs .. 5.031 μs)
+                         0.989 R²   (0.984 R² .. 0.993 R²)
+    mean                 4.880 μs   (4.727 μs .. 5.082 μs)
+    std dev              557.2 ns   (474.4 ns .. 679.0 ns)
+    allocated:           1.000 R²   (1.000 R² .. 1.000 R²)
+      iters              6873.916   (6869.886 .. 6877.363)
+      y                  87788.795  (40122.465 .. 138302.963)
+    bytesCopied:         0.992 R²   (0.988 R² .. 0.994 R²)
+      iters              3445.525   (3344.121 .. 3506.699)
+      y                  -2354900.143 (-2788182.016 .. -1803267.616)
+    cycles:              0.989 R²   (0.984 R² .. 0.993 R²)
+      iters              11270.819  (10876.672 .. 11600.162)
+      y                  -2718971.938 (-4140776.526 .. -1258837.561)
+    numGcs:              1.000 R²   (1.000 R² .. 1.000 R²)
+      iters              1.162e-2   (1.155e-2 .. 1.167e-2)
+      y                  -0.851     (-1.078 .. -0.607)
+    mutatorWallSeconds:  0.989 R²   (0.983 R² .. 0.993 R²)
+      iters              1.881e-6   (1.836e-6 .. 1.947e-6)
+      y                  4.446e-4   (2.094e-4 .. 6.674e-4)
+    gcWallSeconds:       0.981 R²   (0.973 R² .. 0.988 R²)
+      iters              3.020e-6   (2.866e-6 .. 3.142e-6)
+      y                  -1.624e-3  (-2.172e-3 .. -1.087e-3)
+    cpuTime:             0.986 R²   (0.979 R² .. 0.991 R²)
+      iters              1.454e-5   (1.396e-5 .. 1.506e-5)
+      y                  -5.814e-3  (-7.841e-3 .. -3.544e-3)
+    variance introduced by outliers: 90% (severely inflated)
+
+    benchmarking Control.Monad.DetIO.putTextLn (nondet)
+    time                 109.6 μs   (98.19 μs .. 118.1 μs)
+                         0.959 R²   (0.946 R² .. 0.976 R²)
+    mean                 87.90 μs   (83.40 μs .. 94.12 μs)
+    std dev              17.88 μs   (14.38 μs .. 22.99 μs)
+    allocated:           0.954 R²   (0.928 R² .. 0.970 R²)
+      iters              4928.042   (4780.815 .. 5090.108)
+      y                  226200.782 (70472.609 .. 385859.527)
+    bytesCopied:         0.258 R²   (0.100 R² .. 0.457 R²)
+      iters              43.187     (23.838 .. 64.509)
+      y                  9049.907   (2159.300 .. 17187.633)
+    cycles:              0.959 R²   (0.946 R² .. 0.977 R²)
+      iters              252112.556 (226626.539 .. 272482.224)
+      y                  -1.913e7   (-2.562e7 .. -1.217e7)
+    numGcs:              0.912 R²   (0.868 R² .. 0.942 R²)
+      iters              3.560e-3   (3.192e-3 .. 3.845e-3)
+      y                  5.166e-2   (-6.744e-2 .. 0.190)
+    mutatorWallSeconds:  0.959 R²   (0.945 R² .. 0.974 R²)
+      iters              1.093e-4   (9.874e-5 .. 1.182e-4)
+      y                  -8.335e-3  (-1.117e-2 .. -5.407e-3)
+    gcWallSeconds:       0.364 R²   (0.218 R² .. 0.547 R²)
+      iters              2.624e-7   (1.847e-7 .. 3.511e-7)
+      y                  3.094e-5   (-2.446e-6 .. 6.652e-5)
+    cpuTime:             0.949 R²   (0.931 R² .. 0.970 R²)
+      iters              1.990e-4   (1.761e-4 .. 2.184e-4)
+      y                  -1.770e-2  (-2.326e-2 .. -1.142e-2)
+    variance introduced by outliers: 96% (severely inflated)
+
+      10,056,669,232 bytes allocated in the heap
+       3,532,822,440 bytes copied during GC
+          28,310,272 bytes maximum residency (308 sample(s))
+           5,988,440 bytes maximum slop
+                  80 MB total memory in use (0 MB lost due to fragmentation)
+
+                                         Tot time (elapsed)  Avg pause  Max pause
+      Gen  0     15116 colls, 15116 par    4.204s   1.750s     0.0001s    0.0021s
+      Gen  1       308 colls,   307 par    3.796s   1.476s     0.0048s    0.0621s
+
+      Parallel GC work balance: 22.07% (serial 0%, perfect 100%)
+
+      TASKS: 17 (1 bound, 16 peak workers (16 total), using -N4)
+
+      SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+      INIT    time    0.000s  (  0.002s elapsed)
+      MUT     time   13.548s  ( 14.659s elapsed)
+      GC      time    8.000s  (  3.226s elapsed)
+      EXIT    time    0.000s  (  0.000s elapsed)
+      Total   time   21.548s  ( 17.887s elapsed)
+
+      Alloc rate    742,299,175 bytes per MUT second
+
+      Productivity  62.9% of total user, 82.0% of total elapsed
+
+And at -N8:
+
+    benchmarking Data.Text.putStrLn
+    time                 196.0 μs   (182.1 μs .. 210.6 μs)
+                         0.972 R²   (0.958 R² .. 0.986 R²)
+    mean                 204.8 μs   (195.7 μs .. 212.8 μs)
+    std dev              26.38 μs   (21.11 μs .. 34.94 μs)
+    bytesCopied:         0.334 R²   (0.211 R² .. 0.476 R²)
+      iters              96.975     (69.469 .. 133.987)
+      y                  16237.235  (9647.353 .. 25267.331)
+    variance introduced by outliers: 87% (severely inflated)
+
+    benchmarking Control.Monad.DetIO.putTextLn
+    time                 12.36 μs   (11.47 μs .. 13.10 μs)
+                         0.963 R²   (0.950 R² .. 0.977 R²)
+    mean                 11.11 μs   (10.29 μs .. 11.96 μs)
+    std dev              2.432 μs   (1.994 μs .. 2.895 μs)
+    bytesCopied:         0.979 R²   (0.971 R² .. 0.985 R²)
+      iters              5799.653   (5422.528 .. 6021.933)
+      y                  -2119246.886 (-2683806.870 .. -1492574.541)
+    variance introduced by outliers: 97% (severely inflated)
+
+    benchmarking Control.Monad.DetIO.putTextLn (nondet)
+    time                 179.1 μs   (168.3 μs .. 186.3 μs)
+                         0.987 R²   (0.981 R² .. 0.993 R²)
+    mean                 155.7 μs   (150.1 μs .. 161.8 μs)
+    std dev              18.09 μs   (14.71 μs .. 23.34 μs)
+    bytesCopied:         0.316 R²   (0.147 R² .. 0.529 R²)
+      iters              115.353    (68.673 .. 165.205)
+      y                  15197.252  (4448.865 .. 25553.267)
+    variance introduced by outliers: 85% (severely inflated)
+
+       7,553,077,680 bytes allocated in the heap
+       2,273,042,504 bytes copied during GC
+          22,688,672 bytes maximum residency (219 sample(s))
+           4,476,320 bytes maximum slop
+                  64 MB total memory in use (0 MB lost due to fragmentation)
+
+                                         Tot time (elapsed)  Avg pause  Max pause
+      Gen  0     10964 colls, 10964 par    5.976s   1.419s     0.0001s    0.0042s
+      Gen  1       219 colls,   218 par    7.548s   1.549s     0.0071s    0.0584s
+
+      Parallel GC work balance: 11.49% (serial 0%, perfect 100%)
+
+      TASKS: 33 (1 bound, 32 peak workers (32 total), using -N8)
+
+      SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+      INIT    time    0.000s  (  0.003s elapsed)
+      MUT     time   11.724s  ( 14.220s elapsed)
+      GC      time   13.524s  (  2.968s elapsed)
+      EXIT    time    0.000s  (  0.000s elapsed)
+      Total   time   25.248s  ( 17.191s elapsed)
+
+      Alloc rate    644,240,675 bytes per MUT second
+
+      Productivity  46.4% of total user, 82.7% of total elapsed
+
+
+[2017.04.16] {Bounding prints-per-thread}
+-----------------------------------------
+
+If we want to avoid an unbounded memory usage by buffered prints, we
+can max out the prints-per-thread at, say, 1000:
+
+This actually doesn't help overall productivity as much as I thought.
+It seems to improve R^2 a tiny bit but not much.
+
+   benchmarking Text.putStrLn
+   time                 202.6 μs   (192.4 μs .. 210.9 μs)
+                        0.981 R²   (0.972 R² .. 0.989 R²)
+   mean                 194.3 μs   (185.8 μs .. 201.0 μs)
+   std dev              25.89 μs   (21.98 μs .. 31.11 μs)
+   bytesCopied:         0.398 R²   (0.248 R² .. 0.579 R²)
+     iters              115.386    (86.888 .. 156.291)
+     y                  15481.128  (7451.401 .. 24216.955)
+   variance introduced by outliers: 88% (severely inflated)
+
+   benchmarking DetIO.putTextLn_det
+   time                 11.36 μs   (10.47 μs .. 11.89 μs)
+                        0.974 R²   (0.965 R² .. 0.984 R²)
+   mean                 9.937 μs   (9.597 μs .. 10.46 μs)
+   std dev              1.469 μs   (1.237 μs .. 1.768 μs)
+   bytesCopied:         0.997 R²   (0.996 R² .. 0.998 R²)
+     iters              5213.927   (5105.309 .. 5293.266)
+     y                  -1124347.384 (-1355780.440 .. -900710.441)
+   variance introduced by outliers: 93% (severely inflated)
+
+   benchmarking DetIO.putTextLn_nondet
+   time                 163.6 μs   (159.4 μs .. 168.2 μs)
+                        0.995 R²   (0.993 R² .. 0.997 R²)
+   mean                 156.7 μs   (153.9 μs .. 159.3 μs)
+   std dev              9.957 μs   (8.282 μs .. 12.48 μs)
+   bytesCopied:         0.489 R²   (0.306 R² .. 0.695 R²)
+     iters              151.741    (109.659 .. 200.113)
+     y                  6627.933   (-2163.962 .. 17285.268)
+   variance introduced by outliers: 62% (severely inflated)
+
+      8,445,121,192 bytes allocated in the heap
+      2,404,994,488 bytes copied during GC
+         23,914,688 bytes maximum residency (268 sample(s))
+          2,886,400 bytes maximum slop
+                 60 MB total memory in use (0 MB lost due to fragmentation)
+
+                                        Tot time (elapsed)  Avg pause  Max pause
+     Gen  0     12123 colls, 12123 par    6.892s   1.761s     0.0001s    0.0048s
+     Gen  1       268 colls,   267 par    4.732s   0.785s     0.0029s    0.0137s
+
+     Parallel GC work balance: 12.85% (serial 0%, perfect 100%)
+
+     TASKS: 33 (1 bound, 32 peak workers (32 total), using -N8)
+
+     SPARKS: 0 (0 converted, 0 overflowed, 0 dud, 0 GC'd, 0 fizzled)
+
+     INIT    time    0.000s  (  0.003s elapsed)
+     MUT     time   11.936s  ( 14.676s elapsed)
+     GC      time   11.624s  (  2.546s elapsed)
+     EXIT    time    0.008s  (  0.000s elapsed)
+     Total   time   23.568s  ( 17.225s elapsed)
+
+     Alloc rate    707,533,611 bytes per MUT second
+
+     Productivity  50.7% of total user, 85.2% of total elapsed
+

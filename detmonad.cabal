@@ -1,0 +1,106 @@
+name:                detmonad
+version:             0.1
+synopsis:            Deterministic IO
+description:         Deteerminstic IO
+homepage:            https://github.com/iu-parfunc/detmonad
+bug-reports:         https://github.com/iu-parfunc/detmonad/issues
+license:             BSD3
+license-file:        LICENSE
+author:              Ryan Newton
+maintainer:          Ryan Newton
+stability:           Experimental
+copyright:           (C) 2016-2017 Ryan Newton
+category:            System
+build-type:          Custom
+extra-source-files:  CHANGELOG.md, README.md, cbits/libdet.c
+cabal-version:       >=1.10
+
+-- This can be quite permissive, we are just calling GCC:
+custom-setup
+  setup-depends: base >= 4.6
+               , Cabal >= 1.24
+               , process              >= 1.1    && < 1.5
+               , filepath
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Control.Monad.DetIO
+                       Control.Monad.DetIO.Perms
+                       Control.Monad.DetIO.System
+                       Control.Monad.DetIO.Unsafe
+                       Control.Monad.DetIO.Logging
+  other-modules:
+                       Control.Monad.DetIO.Reexports
+
+                       Paths_detmonad
+  build-depends:       async
+                     , atomic-primops       >= 0.6    && < 0.9
+                     , base                 >= 4.8    && < 5
+                     , bytestring           >= 0.9    && < 0.11
+                     , containers           >= 0.1    && < 0.6
+                     , directory            >= 1.2    && < 1.4
+                     , filepath
+                     , lattices
+                     , mtl                  >= 2.1    && < 2.3
+                     , process              >= 1.1    && < 1.5
+                     , QuickCheck
+                     , thread-local-storage >= 0.1    && < 0.2
+                     , semigroups           >= 0.17   && < 1
+                     , text                 >= 0.11.1 && < 1.3
+                     , transformers         >= 0.4    && < 0.6
+                     , monad-par
+                     , pretty-show
+                     , tslogger             >= 0.2
+                     , unix
+                     , extra
+
+                     -- TEMP HACK:  For debugging in `stack ghci`.
+                     , hspec, temporary, silently, HUnit
+
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+
+executable detflow
+  hs-source-dirs:      harness
+  main-is:             Main.hs
+  build-depends:       base             >= 4.8  && < 5
+                     , clock
+                     , detmonad
+                     , filepath
+                     , process
+                     , temporary
+                     , directory            >= 1.2    && < 1.4
+                     , optparse-applicative
+                     , streaming-commons
+                     , async
+                     , conduit
+                     , conduit-extra
+                     , bytestring
+                     , resourcet
+  default-language:    Haskell2010
+  ghc-options:         -Wall -threaded -rtsopts
+
+test-suite tests
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      tests
+  main-is:             Spec.hs
+  other-modules:       DetMonadSpec, PermSpec, DetPrintSpec, SystemTestsSpec
+  build-depends:       base     >= 4.8 && < 5
+                     , bytestring
+                     , containers
+                     , detmonad
+                     , filepath
+                     , hspec    >= 2   && < 3
+                     , HUnit
+                     , QuickCheck
+                     , silently
+                     , async
+                     , temporary
+                     , directory            >= 1.2    && < 1.4
+                     , process
+  default-language:    Haskell2010
+  ghc-options:         -Wall -threaded -rtsopts
+
+source-repository head
+  type:     git
+  location: https://github.com/iu-parfunc/detmonad

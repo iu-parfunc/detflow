@@ -1,0 +1,34 @@
+
+
+[2017.04.03] {Testing bioinformatics softwares}
+-----------------------------------------------
+
+Some candidates:
+
+ * raxml  - takes alignments
+     - worked fine from the first
+
+ * BWA - align fastq reads to (in our sample run) wMel
+     - Internal paralellism, problems.
+     - /dev/shm/bwactl problems
+     - fixed by older minor release.
+
+ * mothur -
+    - Internal paralellism, but seems to support sequnetial semantics
+    - log file races, don't run twice from the same dir.
+
+ * hmmer - hmm build builds an hmm from an aligned file
+           (machine learning), second phase is a searching one and
+           requires a larger database
+    - Internal paralellism, problems.  Started an hmmer_hacks repo to
+      excise the internal parallelism.
+
+ * clustal - can use the alignments, same as raxml
+    - works fine on first try
+
+ * bowtie - alignment and other things.  python scripts around C++
+          executables.
+    - 
+ 
+ * breseq - SNP analysis
+ 

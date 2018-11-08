@@ -1,0 +1,1 @@
+detflow:x:1000:1000:detflow,,,:/home/detflow:/bin/bash

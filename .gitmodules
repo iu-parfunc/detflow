@@ -1,0 +1,3 @@
+[submodule "Detbox"]
+	path = Detbox
+	url = git@github.com:upenn-acg/Detbox.git
