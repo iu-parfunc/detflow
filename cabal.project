@@ -1,0 +1,3 @@
+packages: .
+          ./examples/detmake/app
+          ./examples/detmake/app/makefile-0.1.1.0

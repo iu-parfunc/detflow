@@ -19,6 +19,7 @@ import qualified Control.Concurrent as C
 import           Control.Concurrent.Async as A
 import qualified Control.Exception as E
 import           Control.Monad hiding (join)
+import           Control.Monad.Fail (MonadFail)
 import           Control.Monad.DetIO.Logging (glog, logStrLn, dbgLvl)
 import           Control.Monad.DetIO.Perms
 import           Control.Monad.State (liftIO, lift)
@@ -180,6 +181,7 @@ newtype DetIO a = DetIO (S.StateT ThreadState IO a)
            , Functor
            , Monad
            , MonadPlus
+           , MonadFail
            )
 
 -- | By convention we typically designate a particular directory as

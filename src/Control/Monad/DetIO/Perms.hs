@@ -41,7 +41,7 @@ import qualified Data.Map.Strict as M
 import           Data.Maybe
 import           Data.Char
 import           Data.List
-import           Data.Either
+import           Data.Either (isRight)
 import           Algebra.Lattice
 import           System.FilePath
 import           Test.QuickCheck
