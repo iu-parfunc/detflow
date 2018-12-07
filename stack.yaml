@@ -40,6 +40,7 @@ resolver: lts-8.6
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - '.'
+- './hs-ambrosia'
 - './examples/detmake/app'
 - './examples/detmake/app/makefile-0.1.1.0'
 
