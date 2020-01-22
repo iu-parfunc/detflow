@@ -13,12 +13,12 @@ import System.IO.Silently
 -- import Control.Exception
 import Control.Concurrent.Async as A
 import qualified Control.Concurrent as C
-    
+
 import Test.Hspec hiding (example)
 -- import           Test.Hspec.QuickCheck (prop)
 -- import           Test.HUnit
 -- import           Test.QuickCheck (Arbitrary(..), Gen, generate)
-    
+
 --------------------------------------------------------------------------------
 
 
@@ -37,14 +37,14 @@ main :: IO ()
 main = hspec spec
 
 spec :: Spec
-spec = 
+spec =
   describe "Passing, valid tests: " $ do
 --    it "t1: trivial" (runIO t1 >>= (`shouldBe` 3))
     it "can_return" (t1 `shouldReturn` 3)
     it "can_new" (t2 `shouldReturn` 3)
     it "can_put" (t3 `shouldReturn` 3)
     it "can_get" (t4 `shouldReturn` 'a')
-  
+
     it "can_print_on_main_thread" (t5 `shouldPrint` "hi")
     it "can_sequentially_print"   (t6 `shouldPrint` "hi there")
     it "can_parallel_print"       (t7 `shouldPrint` "there")
@@ -62,7 +62,7 @@ spec =
 
 -- FIXME: get this passing
 --    it "should error" (t13 `shouldThrow` \(_ :: SomeException) -> True)
-       
+
     it "extra_child->parent_sync_edge"  (t14 `shouldPrint` "a1 a2 b1 a3 b2 a4")
     it "extra_parent->child_sync_edge"  (t15 `shouldPrint` "a1 a2 a3 b1 b2 a4")
 
@@ -84,12 +84,12 @@ shouldDiverge act str = (do
   C.threadDelay (200*1000)
   p <- A.poll a
   case p of
-    Nothing        -> return () -- good, hasn't terminated.
-    Just (Left e)  -> error $ "Supposedly-diverging thread threw exception: "++show e
-    Just (Right x) -> error $ "Supposedly-diverging thread returned successfully."
+    Nothing         -> return () -- good, hasn't terminated.
+    Just (Left e)   -> error $ "Supposedly-diverging thread threw exception: "++show e
+    Just (Right _x) -> error $ "Supposedly-diverging thread returned successfully."
   cancel a
   ) `shouldPrint` str
-   
+
 --------------------------------------------------------------------------------
 
 t1 :: IO Integer
@@ -97,7 +97,7 @@ t1 = runDetIO (return 3)
 
 t2 :: IO Integer
 t2 = runDetIO (do _ <- new; return 3)
-     
+
 t3 :: IO Integer
 t3 = runDetIO (do v <- new; put v 'a'; return 3)
 
@@ -110,7 +110,7 @@ t5 = runDetIO (putStrLn "hi")
 
 t6 :: IO ()
 t6 = runDetIO (do putStrLn "hi"; putStrLn "there")
-     
+
 t7 :: IO ()
 t7 = runDetIO (do _ <- forkIO (putStrLn "hi"); putStrLn "there")
 
@@ -176,7 +176,7 @@ t13 = runDetIO (do v1 <- forkIO (do putStrLn "b1"
                    _v2 <- joinThread v1
                    -- get v2
                    putStrLn "a2")
- 
+
 t14 :: IO ()
 t14 = runDetIO (do iv1 <- new
                    putStrLn "a1"
@@ -227,7 +227,7 @@ t17 :: IO ()
 t17 = runDetIO (do iv1 <- new
                    iv2 <- new
                    putStrLn "a1"
-                   th1 <- forkIO (do putStrLn "b1"                                        
+                   th1 <- forkIO (do putStrLn "b1"
                                      "hi" <- get iv1
                                      putStrLn "b2"
                                      put iv2 ("there"::String)
@@ -236,7 +236,7 @@ t17 = runDetIO (do iv1 <- new
                    putStrLn "a2"
                    put iv1 ("hi"::String)
                    putStrLn "a3"
-                   "there" <- get iv2                   
+                   "there" <- get iv2
                    putStrLn "a4"
                    joinThread th1 -- Sync the child thread
                    putStrLn "a5")

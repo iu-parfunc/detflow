@@ -18,7 +18,7 @@
 # resolver: lts-7.18
 # resolver: lts-6.30
 # resolver: lts-6.17
-resolver: lts-8.6
+resolver: lts-14.21
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -47,7 +47,6 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - base-compat-0.11.0
-- thread-local-storage-0.1.0.4
 - semilattices-0.0.0.4
 - tslogger-0.2.1.0
 

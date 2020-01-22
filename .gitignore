@@ -28,4 +28,4 @@ out
 .#*
 *.md5sum
 examples/bioinfo/raxml/src/
-
+stack.yaml.lock
