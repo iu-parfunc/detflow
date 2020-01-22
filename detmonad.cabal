@@ -41,7 +41,7 @@ library
                      , directory            >= 1.2    && < 1.4
                      , fail
                      , filepath
-                     , lattices
+                     , lattices                          < 2
                      , mtl                  >= 2.1    && < 2.3
                      , process              >= 1.1    && < 1.7
                      , QuickCheck
