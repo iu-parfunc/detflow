@@ -42,7 +42,10 @@ import           Data.Maybe
 import           Data.Char
 import           Data.List
 import           Data.Either (isRight)
-import           Algebra.Lattice
+import           Data.Semilattice.Join
+import           Data.Semilattice.Lower
+import           Data.Semilattice.Meet
+import           Data.Semilattice.Upper
 import           System.FilePath
 import           Test.QuickCheck
 
@@ -262,7 +265,7 @@ weight (RW w) = w
 newtype InitialPerms = IP Perms
 
 -- | Join is permissions *union*.
-instance JoinSemiLattice InitialPerms where
+instance Join InitialPerms where
   IP a \/ IP b = IP (go a b)
    where
     go :: Perms -> Perms -> Perms
@@ -286,15 +289,15 @@ joinPerm a b =
                then R ro
                else RW rw
 
-instance BoundedJoinSemiLattice InitialPerms where
-  bottom = IP emptyPerms
+instance Lower InitialPerms where
+  lowerBound = IP emptyPerms
 
 -- | Meet is permissions *intersection*.
-instance MeetSemiLattice InitialPerms where
+instance Meet InitialPerms where
   _a /\ _b = undefined
 
-instance BoundedMeetSemiLattice InitialPerms where
-  top = IP allPerms
+instance Upper InitialPerms where
+  upperBound = IP allPerms
 
 
 

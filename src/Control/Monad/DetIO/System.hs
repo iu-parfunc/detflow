@@ -26,6 +26,7 @@ module Control.Monad.DetIO.System
 import Control.Monad.DetIO.Logging (glog,dbgLvl)
 import Control.Monad.DetIO.Perms
 import Control.Monad.DetIO.Unsafe as U
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.State as S
 import Control.Concurrent.Chan
 import Control.Exception as E
@@ -136,7 +137,7 @@ voidProcess f ls =
   --   NonDet -> lio $ withLease shellLeases $
   --             Proc.readCreateProcess cp0 input
 
-    
+
   --   undefined
 
 -- | Analogous to System.Process.callProcess
@@ -144,7 +145,7 @@ callCommand :: String -> DetIO ()
 callCommand str = callCreateProcess (Proc.shell str)
 
 callCreateProcess :: Proc.CreateProcess -> DetIO ()
-callCreateProcess cp =                    
+callCreateProcess cp =
   if dbgLvl >= printImmediatelyDebugLvl
   then do "" <- readCreateProcess cp{ Proc.std_out = Proc.Inherit } ""
           return ()
@@ -161,7 +162,7 @@ system s = callCommand s >> return ExitSuccess
 -- is for compatibility with System.Process.system.
 rawSystem :: String -> [String] -> DetIO ExitCode
 rawSystem f ls = callProcess f ls >> return ExitSuccess
-                    
+
 -- | ReadCreateProcess that sets up the environment and executes the
 --   subprocess.  Here we apply some modifications to the environment
 --   that the user has requested for the subprocess.  We also apply
@@ -182,7 +183,7 @@ readCreateProcess cp0 input = do
                  NonDet    -> error "System.hs/readCreateProcess: internal error"
      let cp = if L.dbgLvl >= printImmediatelyDebugLvl
               then cp2 { Proc.std_err = Proc.Inherit } -- Echo immediately.
-              else cp2 
+              else cp2
 
      let (rs, rws) = partitionPerms perms
          colonify  = intercalate ":"
@@ -194,7 +195,7 @@ readCreateProcess cp0 input = do
 
      -- TODO: use pedigree ONLY instead of system random names:
      liftIOToDet $
-       withLease shellLeases $                 
+       withLease shellLeases $
        withSystemTempDirectory "pedigree_here" $ \ tmpdir -> do
            libdet <- getDataFileName "cbits/libdet.so"
            wl     <- getWhitelist
@@ -214,7 +215,7 @@ readCreateProcess cp0 input = do
                       , ("TMPDIR",tmpdir)
                       , ("LD_PRELOAD", libdet)
                       , ("TERM","xterm") -- Choice: let this be a source of nondeterminism? No. Constant.
-                        
+
                       ----------------- Option 1: MINIMAL fraction of parent env ----------------------
                       -- , ("PATH", parentEnv M.! "PATH")
                       ]
@@ -224,7 +225,7 @@ readCreateProcess cp0 input = do
                       -- Here we DIFFER from the Proc.readCreateProcess policy.  We don't pass through
                       -- the whole environment by DEFAULT.  Rather, a minimal environment.  If you want
                       -- more you have to ask for it explicitly.
-                      `M.union` (M.fromList (fromMaybe ([ ("PATH", (parentEnv M.! "PATH")) ] 
+                      `M.union` (M.fromList (fromMaybe ([ ("PATH", (parentEnv M.! "PATH")) ]
                                                         ++ maybEnv "DEBUG" parentEnv
                                                         -- ++ maybEnv "TERM"  parentEnv
                                                        )
@@ -244,7 +245,7 @@ readCreateProcess cp0 input = do
                then do sout <- Proc.readCreateProcess (cp{Proc.env= Just env'}) input
                        return (ExitSuccess,sout,"")
                else Proc.readCreateProcessWithExitCode (cp{Proc.env= Just env'}) input
-                               
+
            let ctxt = "\nCommand: "++(show (Proc.cmdspec cp))
                       ++"\nStderr was:\n"++serr
                       ++"\nStdout was:\n"++sout
@@ -259,7 +260,7 @@ readCreateProcess cp0 input = do
                -- case serr of
                --   "" -> return sout
                --   _  -> error $ "\nreadProcess: command exited with non-empty stderr output."++ctxt
-                       
+
                -- Deterministically put stderr AFTER stdout.  Coarse grained!
                return (sout++serr)
 
@@ -270,11 +271,11 @@ readCreateProcess cp0 input = do
                 -- use createProcess to directly forward stderr to our stderr
                 -- handle, not echo it post-facto after buffering it in memory...
 
-maybEnv var parentEnv = 
+maybEnv var parentEnv =
     case M.lookup var parentEnv of
       Nothing -> []
       Just d  -> [(var,d)]
-                      
+
 ppCmdSpec :: Proc.CmdSpec -> String
 ppCmdSpec (Proc.ShellCommand s) = s
 ppCmdSpec (Proc.RawCommand fp args) = fp ++ " " ++ unwords args
@@ -284,7 +285,7 @@ ppCmdSpec (Proc.RawCommand fp args) = fp ++ " " ++ unwords args
 -- This is a crude attempt to prevent piping or launching background
 -- processes.  It's completely optional, because the subprocess will
 -- be constrained by the dynamic harness to be serialized.
-sanitize :: (Monad m) => String -> m ()
+sanitize :: Fail.MonadFail m => String -> m ()
 sanitize str = do
   {-
   when ('|' `elem` str) $
@@ -295,7 +296,7 @@ sanitize str = do
       fail $ "Background processes disallowed (in " ++ str ++ ")"
     _ -> return ()
 
-sanitizeCP :: (Monad m) => Proc.CreateProcess -> m Proc.CreateProcess
+sanitizeCP :: Fail.MonadFail m => Proc.CreateProcess -> m Proc.CreateProcess
 sanitizeCP cp = do
  -- These are ignored anyway by readCreateProcess:
  -- if Proc.std_in cp /= Proc.Inherit

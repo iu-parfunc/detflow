@@ -41,7 +41,7 @@ library
                      , directory            >= 1.2    && < 1.4
                      , fail
                      , filepath
-                     , lattices                          < 2
+                     , semilattices
                      , mtl                  >= 2.1    && < 2.3
                      , process              >= 1.1    && < 1.7
                      , QuickCheck
@@ -54,6 +54,7 @@ library
                      , tslogger             >= 0.2
                      , unix
                      , extra
+                     , fail
 
                      -- TEMP HACK:  For debugging in `stack ghci`.
                      , hspec, temporary, silently, HUnit
