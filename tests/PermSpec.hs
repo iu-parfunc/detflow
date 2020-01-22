@@ -4,21 +4,17 @@ module PermSpec
     where
 
 import           Control.Monad (replicateM)
-import           Control.Monad.DetIO.Perms 
+import           Control.Monad.DetIO.Perms
 
 import           Data.Either (isRight)
 import qualified Data.Map.Strict as M
 import qualified Data.List as L
 
-import           System.Directory
 import           System.FilePath
 import           Test.Hspec hiding (example)
 import           Test.Hspec.QuickCheck (prop)
 import           Test.HUnit
 import           Test.QuickCheck (Arbitrary(..), Gen, generate)
-
-import Debug.Trace
-
 
 main :: IO ()
 main = hspec spec
@@ -55,7 +51,7 @@ spec = do
     it "normPerms10" (let x = Node (RW 1) (M.fromList [("a",Has (R 1))]) in
                      normPerms x `shouldBe` x)
 
-         
+
   describe "checkout/addPerms arithmetic" $ do
     it "checkout/addPerms_inverse" case_addPerms1
     prop "prop_addPerms_self"    prop_addPerms_self
@@ -83,7 +79,7 @@ example = Node noPerm
 parent, child :: Perms
 (parent,child) = pr
  where
-  Right pr = checkout (mkPermR "/input/a") example 
+  Right pr = checkout (mkPermR "/input/a") example
 
 case_addPerms1 :: Assertion
 case_addPerms1 = assertEqual "checkout/join inverse"
@@ -95,7 +91,7 @@ _prop_checkoutR_addPerms_inverse p1 pp =
     case checkout pp p1 of
       Right (a,b) -> Right p1 == addPerms' a b
       Left e -> error e
-                     
+
 -- TODO more props:
 -- prop total order of Frac
 
@@ -133,7 +129,7 @@ prop_cantRead1 pa = not $ canRead (pathPermToPath pa) emptyPerms
 
 -- Cannot read a prefix of the dir we have permission on.
 prop_cantRead_prefix :: PathPerm -> Bool
-prop_cantRead_prefix pp | ls@(_:_) <- pathparts pp = 
+prop_cantRead_prefix pp | ls@(_:_) <- pathparts pp =
                           let prefixPath = "/" ++ concat (L.intersperse "/" (init ls)) in
                           not $ canRead prefixPath (fromPP pp)
                         | otherwise = True
@@ -168,24 +164,24 @@ prop_cantWrite_prefix pp | (_:ls) <- pathparts pp =
 prop_canExtend_parent :: PathPerm -> Bool
 prop_canExtend_parent ReadPath{} = True
 prop_canExtend_parent pp@WritePath{} =
-    let path = pathPermToPath pp 
+    let path = pathPermToPath pp
         child1 = path </> "a"
         child2 = path </> "b"
         p1     = fromPP pp
         Right (p2,cp1) = checkout (mkPermRW child1) p1
         Right (p3,cp2) = checkout (mkPermRW child2) p2
     in
-    canExtendDir path cp1 
-    && canExtendDir path cp2 
+    canExtendDir path cp1
+    && canExtendDir path cp2
     && canExtendDir path p3   -- Parent retains ability too.
-    && canWrite path p1      
+    && canWrite path p1
     && not (canWrite path p3) -- Can't DELETE that directory.
     && not (canWrite path cp1) -- Child can't delete either
     && not (canWrite path cp2)
-                                       
+
 -- failing :: Bool
 -- failing = prop_cantWrite_prefix (mkPermRW "/c")
-                                       
+
 
 {-
 
@@ -218,14 +214,14 @@ addPerms0 =
     emptyPerms
 
 addPerms1 :: Either String Perms
-addPerms1 = do 
+addPerms1 = do
     x <- fromPP (mkPermR "/input") `addPerms'`
-         fromPP (mkPermRW "/output") 
+         fromPP (mkPermRW "/output")
     x `addPerms` emptyPerms
 
 addPerms2 :: Either String Perms
 addPerms2 = addPerms parent child
  where
-  parent = Node { this = R 0, 
+  parent = Node { this = R 0,
                   children = M.fromList [("input",Has (R 1)),("output",Has (RW 1))]}
   child = Has (R 0)

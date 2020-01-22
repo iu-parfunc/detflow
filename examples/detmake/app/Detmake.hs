@@ -12,7 +12,6 @@ import Control.Monad.DetIO.Logging as D
 import Control.Monad.Extra hiding (join)
 
 import qualified Data.ByteString.Char8 as BS
-import Data.Foldable (forM_)
 import Data.Makefile
 import Data.Makefile.Parse (makefile)
 import Data.Makefile.Parse.Internal (unescape)

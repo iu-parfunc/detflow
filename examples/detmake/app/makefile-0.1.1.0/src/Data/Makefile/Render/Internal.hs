@@ -2,10 +2,11 @@
 
 module Data.Makefile.Render.Internal where
 import           Data.Makefile
-import           Data.Monoid
 import qualified Data.ByteString.Lazy as B
 import           Data.ByteString.Builder
 import qualified Data.ByteString.Lazy.Char8 as BL
+import           Prelude ()
+import           Prelude.Compat
 
 writeMakefile :: FilePath -> Makefile -> IO ()
 writeMakefile f m = do

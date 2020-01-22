@@ -17,9 +17,8 @@ module Control.Monad.DetIO.Unsafe where
 import           Control.Applicative
 import qualified Control.Concurrent as C
 import           Control.Concurrent.Async as A
-import qualified Control.Exception as E
+-- import qualified Control.Exception as E
 import           Control.Monad hiding (join)
-import           Control.Monad.Fail (MonadFail)
 import           Control.Monad.DetIO.Logging (glog, logStrLn, dbgLvl)
 import           Control.Monad.DetIO.Perms
 import           Control.Monad.State (liftIO, lift)
@@ -29,15 +28,15 @@ import           Data.IORef
 import           Data.List as L
 import           Data.Map  as M
 import           Data.Maybe (catMaybes)
-import           Data.Monoid ((<>))
 import           Data.Sequence as Seq
 import           Data.Text as T
 import qualified Data.Text.IO as T
 import           Data.Word
-import qualified Prelude as P
-import           Prelude hiding (log,id,putStrLn,putStr)
+import           Prelude ()
+import qualified Prelude.Compat as P
+import           Prelude.Compat hiding (log,id,putStrLn,putStr)
 import           Text.Show.Pretty (ppShow)
-import           Text.Printf (printf)
+-- import           Text.Printf (printf)
 -- FIXME: we currently have potentially exponential behavior in the
 -- log graph generation... how to fix that?
 
@@ -419,7 +418,7 @@ fullNonDet = DetIO (S.modify (\ts -> ts { execMode = NonDet }))
 
 -- | Bounce exceptions over to another
 connectExns :: C.ThreadId -> IO a -> IO a
-connectExns tid act =
+connectExns _tid act =
     act
 --  E.catch act (\(e::E.SomeException) -> E.throwTo tid e >> E.throw e)
 

@@ -10,10 +10,12 @@ import           Data.Conduit
 import           Data.Conduit.Binary
 import qualified Data.Conduit.List as CL
 import           Data.Conduit.Process
-import           Data.Monoid
 import qualified Data.List as L
 
 import           Options.Applicative
+
+import           Prelude ()
+import           Prelude.Compat
 
 import           System.Clock
 import           System.Exit
@@ -39,7 +41,7 @@ data Args = Args
   } deriving Show
 
 -- | How to invoke the job at runtime, what kind of determinism enforcement and how much?
-data DetMode = PreloadLibDet { _useASLR :: Bool } 
+data DetMode = PreloadLibDet { _useASLR :: Bool }
                -- ^ The default.
              | NonDet   -- ^ Run with no enforcement, should be fastest.
              | RR_Record -- ^ Run with Mozilla rr as a point of comparison, record trace.
@@ -106,16 +108,16 @@ argsParser
   <*> switch
       (  long "runshell"
       <> short 'r'
-      <> help "Run a shell command directly instead of a Haskell file")  
+      <> help "Run a shell command directly instead of a Haskell file")
 
   <*> (flag' (PreloadLibDet True) (long "unsafe-ASLR" <>
-                                   help "Use address space randomization, which is a source of nondetermiism.") <|>       
+                                   help "Use address space randomization, which is a source of nondetermiism.") <|>
        flag' NonDet (long "nondet" <>
-                     help "Maximum performance, but no determinism enforcement at all.") <|>         
+                     help "Maximum performance, but no determinism enforcement at all.") <|>
        flag' RR_Record (long "rr-record" <>
                         help "Run the workload under Mozilla's 'rr record'.  Records to the default trace dir.") <|>
        flag' RR_Record (long "rr-chaos" <>
-                        help "Use 'rr record -- chaos' to help find bugs.") <|>     
+                        help "Use 'rr record -- chaos' to help find bugs.") <|>
        flag' RR_Replay (long "rr-replay" <>
                         help "After running with --rr-record, this will run with 'rr replay -a'") <|>
        flag (PreloadLibDet False) (PreloadLibDet False)
@@ -180,14 +182,14 @@ createAndRunWrapper args inDs outD' =
   withSystemTempDirectory "detflow_tmprun" $ \ tmpdir ->
   -- Put the generated script in the current directory so that it can import the target script:
    withTempFile' keepTmps fileDir "DetMainXXX.hs" $ \fp h -> do
-    unless (detMode args == RR_Replay) $ 
+    unless (detMode args == RR_Replay) $
       hPutStrLn h $ detMainFile (detMode args) (jobs args) inDs outD'
                     (if runShellCmd args
                      then Right (file++" "++unwords (exeArgs args))
                      else Left ioMainModName)
     hClose h
     let detMainModName = takeBaseName fp
-                         
+
         ghcCmd = unwords $ [ if compile args
                              then "ghc "++compileArgs args
                              else "runghc"
@@ -230,8 +232,10 @@ createAndRunWrapper args inDs outD' =
         startTime <- getTime Monotonic
         (ClosedStream, out, err, procH) <- streamingProcess runCmdProc
         ec <- runConcurrently $
-                  Concurrently (runResourceT $ out $$ conduitHandle teeOut =$ sink)
-               *> Concurrently (runResourceT $ err $$ conduitHandle teeErr =$ sink)
+                  Concurrently (runResourceT $ runConduit
+                                             $ out .| conduitHandle teeOut .| sink)
+               *> Concurrently (runResourceT $ runConduit
+                                             $ err .| conduitHandle teeErr .| sink)
                *> Concurrently (waitForStreamingProcess procH)
         endTime <- getTime Monotonic
 

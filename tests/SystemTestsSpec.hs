@@ -5,10 +5,8 @@
 module SystemTestsSpec where
 
 import           Control.Exception
-import           Control.Monad
 import           Data.List
 import           Test.Hspec hiding (example)
-import           Test.Hspec.QuickCheck (prop)
 import           System.Directory
 import           System.Process
 import           System.Exit
@@ -46,7 +44,7 @@ spec = do
 
     -- it "runshell_1" (do x <- t4
     --                     x `shouldSatisfy` ("\ESC" `isInfixOf`)) -- Don't require a SPECIFIC escape sequence.
-    
+
 -- This one's failing and I don't know why.  Child process errors w/ code 144 [2017.04.03].
     -- it "hello_shell/Bash3" (do x <- t3 "Bash.hs in/bash3.sh"
     --                            x `shouldSatisfy` ("succeeded" `isInfixOf`))
@@ -89,7 +87,7 @@ t3 which = withCurrentDirectory "./examples/should_run/hello_shell" $ do
 t4 :: IO String
 t4 = safeshell "detflow --runshell clear"
 
-     
+
 -- Failing tests
 --------------------------------------------------------------------------------
 

@@ -126,8 +126,8 @@ callProcess :: String -> [String] -> DetIO ()
 callProcess f ls = callCreateProcess (Proc.proc f ls)
 
 -- | Run a program but ignore its stdout and stderr.  They go into the void.
-voidProcess :: String -> [String] -> DetIO ()
-voidProcess f ls =
+_voidProcess :: String -> [String] -> DetIO ()
+_voidProcess _f _ls =
   undefined
 --   readCreateProcess (Proc.proc f ls) { }
   -- TS{perms,myped,shellLeases,execMode} <- DetIO S.get -- TODO use myped to name tmpdir!!
@@ -169,7 +169,7 @@ rawSystem f ls = callProcess f ls >> return ExitSuccess
 --   sanitization checks, and throw an exception if they fail.
 readCreateProcess :: Proc.CreateProcess -> String -> DetIO String
 readCreateProcess cp0 input = do
-  TS{perms,myped,shellLeases,execMode} <- DetIO S.get -- TODO use myped to name tmpdir!!
+  TS{perms,shellLeases,execMode} <- DetIO S.get -- TODO use myped to name tmpdir!!
 
   case execMode of
     -- Just run natively:
@@ -271,6 +271,7 @@ readCreateProcess cp0 input = do
                 -- use createProcess to directly forward stderr to our stderr
                 -- handle, not echo it post-facto after buffering it in memory...
 
+maybEnv :: Ord a => a -> M.Map a b -> [(a, b)]
 maybEnv var parentEnv =
     case M.lookup var parentEnv of
       Nothing -> []

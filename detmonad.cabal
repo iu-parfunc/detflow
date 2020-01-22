@@ -35,7 +35,8 @@ library
                        Paths_detmonad
   build-depends:       async
                      , atomic-primops       >= 0.6    && < 0.9
-                     , base                 >= 4.8    && < 5
+                     , base                 >= 4.9    && < 5
+                     , base-compat          >= 0.11
                      , bytestring           >= 0.9    && < 0.11
                      , containers           >= 0.1    && < 0.7
                      , directory            >= 1.2    && < 1.4
@@ -65,13 +66,14 @@ library
 executable detflow
   hs-source-dirs:      harness
   main-is:             Main.hs
-  build-depends:       base             >= 4.8  && < 5
+  build-depends:       base        >= 4.9 && < 5
+                     , base-compat >= 0.11
                      , clock
                      , detmonad
                      , filepath
                      , process
                      , temporary
-                     , directory            >= 1.2    && < 1.4
+                     , directory   >= 1.2 && < 1.4
                      , optparse-applicative
                      , streaming-commons
                      , async
@@ -87,18 +89,18 @@ test-suite tests
   hs-source-dirs:      tests
   main-is:             Spec.hs
   other-modules:       DetMonadSpec, PermSpec, DetPrintSpec, SystemTestsSpec
-  build-depends:       base     >= 4.8 && < 5
+  build-depends:       base        >= 4.9 && < 5
                      , bytestring
                      , containers
                      , detmonad
                      , filepath
-                     , hspec    >= 2   && < 3
+                     , hspec       >= 2   && < 3
                      , HUnit
                      , QuickCheck
                      , silently
                      , async
                      , temporary
-                     , directory            >= 1.2    && < 1.4
+                     , directory   >= 1.2 && < 1.4
                      , process
   build-tool-depends:  hspec-discover:hspec-discover >= 2 && < 3
   default-language:    Haskell2010

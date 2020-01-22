@@ -9,13 +9,12 @@ import           Data.ByteString.Char8
 import           Control.Exception
 import           Control.Monad.DetIO as Det
 import           Control.Monad.DetIO.Perms
-import           Control.Monad.DetIO.System (readProcess)
 
 import           Test.Hspec
 import           System.IO.Temp
 import           System.IO
 import           System.FilePath
-    
+
 main :: IO ()
 main = hspec spec
 
@@ -24,9 +23,9 @@ spec = do
   describe "Reading/Writing without permission" $ do
     it "read should fail"  $ t1 `shouldThrow` \(_ :: SomeException) -> True
     it "write should fail" $ t2 `shouldThrow` \(_ :: SomeException) -> True
-                                               
-  describe "Writing with permission" $ 
-    it "should work" $ t3 `shouldReturn` "hello"                                               
+
+  describe "Writing with permission" $
+    it "should work" $ t3 `shouldReturn` "hello"
 
   describe "Illegal uses of readProcess" $ do
     it "& should fail" $
@@ -38,7 +37,7 @@ spec = do
 
 t1 :: IO ByteString
 t1 = runDetIO (Det.readFile "donthaveme")
-                                               
+
 t2 :: IO ()
 t2 = runDetIOWith Nothing (fromPathPerm (mkPermRW "/tmp/a"))
                   (do Det.writeFile "/tmp/b" "this should not be here"

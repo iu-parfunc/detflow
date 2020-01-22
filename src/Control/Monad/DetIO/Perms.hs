@@ -6,6 +6,9 @@
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TupleSections #-}
+-- Testing only
+-- TODO: Remove this.
+{-# OPTIONS_GHC -Wno-duplicate-exports #-}
 
 -- | Abstract datatypes for permissions.
 module Control.Monad.DetIO.Perms
@@ -207,16 +210,16 @@ instance Ord Frac where
     | otherwise = compare (x*2^(b-y)) a
 
 -- | Build a fraction.  Denominator must be a power of two.
-mkFrac :: Int -> Int -> Frac
-mkFrac x y = Frac (fromIntegral x) (log2 y)
+_mkFrac :: Int -> Int -> Frac
+_mkFrac x y = Frac (fromIntegral x) (_log2 y)
 
-log2 :: (Integral a1, Num a, Show a1) => a1 -> a
-log2 n0 = go n0
+_log2 :: (Integral a1, Num a, Show a1) => a1 -> a
+_log2 n0 = go n0
  where
  go 1 = 0
  go n =
   case divMod n 2 of
-    (n',0) -> 1 + log2 n'
+    (n',0) -> 1 + _log2 n'
     _      -> error $ "log2: not a power of 2: "++show n0
 
 -- | Simplify the fraction.
@@ -232,8 +235,8 @@ instance Eq Frac where
     x * (2^b) == a * (2^y)
 
 -- | Debugging only.
-tup :: Frac -> (Int,Int)
-tup (Frac x y) = (x,y)
+_tup :: Frac -> (Int,Int)
+_tup (Frac x y) = (x,y)
 
 
 -- [INTERNAL] Individual file/directory permissions
@@ -248,9 +251,9 @@ data Perm = R  Frac
                     -- active only if the fraction is exactly 1.
   deriving (Eq, Show)
 
-weight :: Perm -> Frac
-weight (R  w) = w
-weight (RW w) = w
+_weight :: Perm -> Frac
+_weight (R  w) = w
+_weight (RW w) = w
 
 
 -- Collecting perms together for whole directories
@@ -621,7 +624,7 @@ getWrite p =
    -- R n  -> error "FINISHME: getWrite" -- (R (halve n), R (halve n))
    -- -- If we halve, they both will be sub-1.0:
    -- RW n -> (RW 0, RW n)
-   R n  -> error "cannot extract a write permission from read-only"
+   R _n -> error "cannot extract a write permission from read-only"
    RW n -> (RW 0, RW n)
    -- Should this be RW 0?  Should that state even exist?
    -- Or should it be `R 0`, which is bottom.
@@ -630,24 +633,24 @@ getWrite p =
 getSharedWrite :: Perm -> (Perm,Perm)
 getSharedWrite p =
  case p of
-   R n  -> error "getSharedWrite: cannot extract a write permission from read-only"
+   R _n -> error "getSharedWrite: cannot extract a write permission from read-only"
    RW n -> (RW (halve n), RW (halve n))
 
 -- | Modify the permissions across all nodes of a directory tree
 --   (leaf and interior)
-mapPerms :: (Perm -> Perm) -> Perms -> Perms
-mapPerms f (Has p) = Has (f p)
-mapPerms f (Node p  ch) = Node (f p) (M.map (mapPerms f) ch)
+_mapPerms :: (Perm -> Perm) -> Perms -> Perms
+_mapPerms f (Has p) = Has (f p)
+_mapPerms f (Node p  ch) = Node (f p) (M.map (_mapPerms f) ch)
 
 -- | Filter out nodes that are not needed.  Return Nothing if there are no nodes
 -- left.
-filterPerms :: (Perm -> Bool) -> Perms -> Maybe Perms
-filterPerms fn (Has p)
+_filterPerms :: (Perm -> Bool) -> Perms -> Maybe Perms
+_filterPerms fn (Has p)
     | fn p = Just (Has p)
     | otherwise = Nothing
-filterPerms fn (Node p ch) =
-    case catMaybes [ (k,) <$> filterPerms fn v | (k,v) <- M.toList ch ] of
-      [] -> filterPerms fn (Has p)
+_filterPerms fn (Node p ch) =
+    case catMaybes [ (k,) <$> _filterPerms fn v | (k,v) <- M.toList ch ] of
+      [] -> _filterPerms fn (Has p)
       ls -> let p' = if fn p then p else p in
             pure $ Node p' (M.fromList ls)
 
@@ -687,13 +690,13 @@ instance Arbitrary Perms where
 -- | Produce a completely random permission... this is tricky as it needs to
 -- respect invariants (FIXME).
 
-arbPerm :: Int -> Gen Perms
-arbPerm 0 = Has <$> arbitrary
-arbPerm n = do
+_arbPerm :: Int -> Gen Perms
+_arbPerm 0 = Has <$> arbitrary
+_arbPerm n = do
   (Positive m) <- arbitrary
   let n' = n `div` (m + 1)
   chars <- replicateM m arbitrary
-  vals  <- replicateM m (arbPerm n')
+  vals  <- replicateM m (_arbPerm n')
   p     <- arbitrary
   return $ Node p (M.fromList [([c],v) | (c,v) <- zip chars vals])
 
@@ -714,17 +717,18 @@ arbPerm2 n = fromRight <$> act
 
 
 -- FIXME: this version diverges:
-arbPerm3 :: Int -> Gen Perms
-arbPerm3 n | n < 1 = trace "Bottom out"$ return (Has (RW 1))
-arbPerm3 n = do trace "ArbPerm2" $ return ()
-                p <- arbPerm3 (n-1)
-                trace "Recur finished, now extend." $ return ()
-                atom <- arbitrary `suchThat`
-                        (\x ->
-                          trace ("Trying "++show x++"\n to join into "++show p)$
-                          isRight (addPerms' p x))
-                let Right p' = addPerms' p atom
-                return p'
+_arbPerm3 :: Int -> Gen Perms
+_arbPerm3 n | n < 1 = trace "Bottom out"$ return (Has (RW 1))
+_arbPerm3 n = do
+  trace "ArbPerm2" $ return ()
+  p <- _arbPerm3 (n-1)
+  trace "Recur finished, now extend." $ return ()
+  atom <- arbitrary `suchThat`
+          (\x ->
+            trace ("Trying "++show x++"\n to join into "++show p)$
+            isRight (addPerms' p x))
+  let Right p' = addPerms' p atom
+  return p'
 
 
 fromRight :: Either a b -> b

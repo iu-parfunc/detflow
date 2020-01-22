@@ -77,7 +77,7 @@ createDirectory fp0 = do
   lio $ Dir.createDirectory fp
 
 createDirectoryIfMissing :: Bool -> FilePath -> DetIO ()
-createDirectoryIfMissing True fp0 =
+createDirectoryIfMissing True _fp0 =
     error "DetIO createDirectoryIfMissing does not yet handle True argument."
 createDirectoryIfMissing False fp0 = do
   fp <- lio $ Dir.makeAbsolute fp0
