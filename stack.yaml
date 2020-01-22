@@ -43,15 +43,11 @@ packages:
 - './examples/detmake/app'
 - './examples/detmake/app/makefile-0.1.1.0'
 
-- location:
-    git:    https://github.com/iu-parfunc/tslogger.git
-    commit: 1f2a55c839b806915cabbf9265ef344369464c1e
-  extra-dep: true
-
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps:
-  - thread-local-storage-0.1.0.4
+- thread-local-storage-0.1.0.4
+- tslogger-0.2.1.0
 
 # Override default flag values for local packages and extra-deps
 flags:
